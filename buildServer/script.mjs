@@ -10,14 +10,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, PROJECT_ID, BUCKET_NAME, AWS_REGION } = process.env;
+const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, PROJECT_ID, AWS_BUCKET_NAME, AWS_REGION } = process.env;
 
 console.log("AWS Access Key:", AWS_ACCESS_KEY_ID ? "Loaded" : "Missing");
 console.log("AWS Secret Key:", AWS_SECRET_ACCESS_KEY ? "Loaded" : "Missing");
-console.log("S3 Bucket:", BUCKET_NAME);
+console.log("S3 Bucket:", AWS_BUCKET_NAME);
 console.log("AWS Region:", AWS_REGION || "Default (ap-south-1)");
 
-if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !PROJECT_ID || !BUCKET_NAME || !AWS_REGION) {
+if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !PROJECT_ID || !AWS_BUCKET_NAME || !AWS_REGION) {
   console.error("Missing required environment variables!");
   process.exit(1);
 }
@@ -30,7 +30,7 @@ const s3 = new S3Client({
   },
 });
 
-const bucket_name = BUCKET_NAME;
+const bucket_name = AWS_BUCKET_NAME;
 
 async function uploadFilesRecursively(directoryPath, project_id, basePath = directoryPath) {
   const files = fs.readdirSync(directoryPath);
