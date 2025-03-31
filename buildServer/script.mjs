@@ -10,26 +10,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, PROJECT_ID, BUCKET_NAME } = process.env;
+const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, PROJECT_ID, BUCKET_NAME, AWS_REGION } = process.env;
 
 console.log("AWS Access Key:", AWS_ACCESS_KEY_ID ? "Loaded" : "Missing");
 console.log("AWS Secret Key:", AWS_SECRET_ACCESS_KEY ? "Loaded" : "Missing");
 console.log("S3 Bucket:", BUCKET_NAME);
+console.log("AWS Region:", AWS_REGION || "Default (ap-south-1)");
 
-if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !PROJECT_ID || !BUCKET_NAME) {
+if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !PROJECT_ID || !BUCKET_NAME || !AWS_REGION) {
   console.error("Missing required environment variables!");
   process.exit(1);
 }
 
 const s3 = new S3Client({
-  region: "ap-south-1",
+  region: AWS_REGION,
   credentials: {
     accessKeyId: AWS_ACCESS_KEY_ID,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
   },
 });
 
-const project_id = PROJECT_ID;
 const bucket_name = BUCKET_NAME;
 
 async function uploadFilesRecursively(directoryPath, project_id, basePath = directoryPath) {
@@ -43,17 +43,7 @@ async function uploadFilesRecursively(directoryPath, project_id, basePath = dire
       await uploadFilesRecursively(filePath, project_id, basePath);
     } else {
       let relativePath = path.relative(basePath, filePath);
-      let key = "";
-
-      if (file === "index.html") {
-        key = `__outputs/${project_id}/index.html`; // Place index.html in __outputs/{project_id}
-      } else {
-        // Ensure `assets/` does not get duplicated
-        if (relativePath.startsWith("assets/")) {
-          relativePath = relativePath.replace(/^assets\//, "");
-        }
-        key = `assets/${relativePath}`; // All other files go inside assets/
-      }
+      let key = file === "index.html" ? `__outputs/${project_id}/index.html` : `assets/${relativePath.replace(/^assets\//, "")}`;
 
       console.log(`Uploading: ${filePath} → S3 Key: ${key}`);
 
@@ -68,7 +58,7 @@ async function uploadFilesRecursively(directoryPath, project_id, basePath = dire
         await s3.send(command);
         console.log(`✅ Uploaded: ${file}`);
       } catch (error) {
-        console.error(`❌ Failed to upload ${file}:`, error);
+        console.error(`❌ Failed to upload ${file}:`, error.message, error.stack);
       }
     }
   }
@@ -78,10 +68,19 @@ async function init() {
   console.log("Executing Script.js .......");
   const outDirPath = path.join(__dirname, "output");
 
+  if (!fs.existsSync(outDirPath)) {
+    console.error("❌ Error: output directory does not exist.");
+    process.exit(1);
+  }
+
   const p = exec(`npm install && npm run build`, { cwd: outDirPath });
 
   p.stdout.on("data", (data) => console.log(data));
   p.stderr.on("data", (data) => console.error(`Error: ${data}`));
+  p.on("error", (err) => {
+    console.error("Exec error:", err);
+    process.exit(1);
+  });
 
   p.on("close", async (code) => {
     console.log(`Build Complete with code: ${code}`);
@@ -98,7 +97,7 @@ async function init() {
     }
 
     console.log("Uploading Files to S3...");
-    await uploadFilesRecursively(distFolderPath, project_id);
+    await uploadFilesRecursively(distFolderPath, PROJECT_ID);
     console.log("✅ Upload Complete.");
   });
 }
