@@ -11,10 +11,9 @@ RUN apt-get install -y git
 
 WORKDIR /home/app
 
-COPY ./main.sh main.sh
-COPY ./script.mjs script.mjs
-COPY ./package.json package.json
-COPY ./package-lock.json package-lock.json
+COPY main.sh main.sh
+COPY script.mjs script.mjs
+COPY package*.json package.json
 COPY .env .env
 
 RUN npm install
