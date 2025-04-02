@@ -39,7 +39,7 @@ const config = {
   TASK: AWS_TASK_DEFINITION,
 };
 
-app.post("/post", async (res, req) => {
+app.post("/project", async (req, res) => {
   const { gitUrl } = req.body;
   const projectId = generateSlug();
 
@@ -49,8 +49,8 @@ app.post("/post", async (res, req) => {
     taskDefinition: config.TASK,
     launchType: "FARGATE",
     count: 1,
-    networkConfigration: {
-      awsvpcConfigration: {
+    networkConfiguration: {
+      awsvpcConfiguration: {
         subnets: [
           AWS_CLUSTER_SUBNET1,
           AWS_CLUSTER_SUBNET2,
@@ -60,20 +60,22 @@ app.post("/post", async (res, req) => {
         assignPublicIp: "ENABLED",
       },
     },
-    overides: {
-      containerOverrides: {
-        name: AWS_IMAGE_NAME,
-        environment: [
-          {
-            name: "GIT_REPOSITORY__URL",
-            vale: gitUrl,
-          },
-          {
-            name: "PROJECT_ID",
-            value: projectId,
-          },
-        ],
-      },
+    overrides: {
+      containerOverrides: [
+        {
+          name: AWS_IMAGE_NAME,
+          environment: [
+            {
+              name: "GIT_REPOSITORY_URL",
+              value: gitUrl,
+            },
+            {
+              name: "PROJECT_ID",
+              value: projectId,
+            },
+          ],
+        },
+      ],
     },
   });
 
