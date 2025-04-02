@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@aws-sdk/client-ecs": "^3.778.0",
-    "random-word-slugs": "^0.1.7"
-  }
-}

@@ -41,6 +41,7 @@ const config = {
 
 app.post("/project", async (req, res) => {
   const { gitUrl } = req.body;
+  console.log("Git URL:", gitUrl);
   const projectId = generateSlug();
 
   // Spin container on AWS ECS
@@ -50,6 +51,7 @@ app.post("/project", async (req, res) => {
     launchType: "FARGATE",
     count: 1,
     networkConfiguration: {
+      assignPublicIp: "ENABLED",
       awsvpcConfiguration: {
         subnets: [
           AWS_CLUSTER_SUBNET1,
@@ -57,16 +59,15 @@ app.post("/project", async (req, res) => {
           AWS_CLUSTER_SUBNET3,
         ],
         securityGroups: [AWS_CLUSTER_SECURITY_GROUP],
-        assignPublicIp: "ENABLED",
       },
     },
     overrides: {
       containerOverrides: [
         {
-          name: AWS_IMAGE_NAME,
+          name:"vercel-clone-image",
           environment: [
             {
-              name: "GIT_REPOSITORY_URL",
+              name: "GIT_REPOSITORY__URL",
               value: gitUrl,
             },
             {
@@ -86,6 +87,7 @@ app.post("/project", async (req, res) => {
     data: {
       projectId,
       url: `http://${projectId}.localhost:8000`,
+      gitUrl,
     },
   });
 });
