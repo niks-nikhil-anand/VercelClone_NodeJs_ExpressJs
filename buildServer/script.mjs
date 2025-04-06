@@ -42,9 +42,8 @@ async function uploadFilesRecursively(directoryPath, project_id, basePath = dire
     if (stat.isDirectory()) {
       await uploadFilesRecursively(filePath, project_id, basePath);
     } else {
-      // Always store in assets folder, keeping the folder structure
-      let relativePath = path.relative(basePath, filePath);
-      let key = `assets/${relativePath}`;
+      const relativePath = path.relative(basePath, filePath).replace(/\\/g, '/'); // Normalize path separators
+      const key = `__outputs/${project_id}/${relativePath}`;
 
       console.log(`Uploading: ${filePath} → S3 Key: ${key}`);
 
@@ -64,7 +63,6 @@ async function uploadFilesRecursively(directoryPath, project_id, basePath = dire
     }
   }
 }
-
 
 async function init() {
   console.log("Executing Script.js .......");
