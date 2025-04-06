@@ -16,6 +16,7 @@ const {
   AWS_CLUSTER_SECURITY_GROUP,
   AWS_IMAGE_NAME,
 } = process.env;
+
 const app = express();
 const PORT = process.env.PORT || 9000;
 
@@ -40,54 +41,70 @@ const config = {
 };
 
 app.post("/project", async (req, res) => {
-  const { gitUrl } = req.body;
-  console.log("Git URL:", gitUrl);
-  const projectId = generateSlug();
+  try {
+    console.log("Received request to /project");
+    console.log("Request body:", req.body);
+    
+    const { gitUrl } = req.body;
+    if (!gitUrl) {
+      console.error("Missing gitUrl in request body");
+      return res.status(400).json({ error: "gitUrl is required" });
+    }
 
-  // Spin container on AWS ECS
-  const runTask = new RunTaskCommand({
-    cluster: config.CLUSTER,
-    taskDefinition: config.TASK,
-    launchType: "FARGATE",
-    count: 1,
-    networkConfiguration: {
-      assignPublicIp: "ENABLED",
-      awsvpcConfiguration: {
-        subnets: [
-          AWS_CLUSTER_SUBNET1,
-          AWS_CLUSTER_SUBNET2,
-          AWS_CLUSTER_SUBNET3,
-        ],
-        securityGroups: [AWS_CLUSTER_SECURITY_GROUP],
-      },
-    },
-    overrides: {
-      containerOverrides: [
-        {
-          name:"vercel-clone-image",
-          environment: [
-            {
-              name: "GIT_REPOSITORY__URL",
-              value: gitUrl,
-            },
-            {
-              name: "PROJECT_ID",
-              value: projectId,
-            },
+    console.log("Git URL:", gitUrl);
+    const projectId = generateSlug();
+    console.log("Generated Project ID:", projectId);
+
+    // Spin container on AWS ECS
+    const runTask = new RunTaskCommand({
+      cluster: config.CLUSTER,
+      taskDefinition: config.TASK,
+      launchType: "FARGATE",
+      count: 1,
+      networkConfiguration: {
+        awsvpcConfiguration: {
+          subnets: [
+            AWS_CLUSTER_SUBNET1,
+            AWS_CLUSTER_SUBNET2,
+            AWS_CLUSTER_SUBNET3,
           ],
+          securityGroups: [AWS_CLUSTER_SECURITY_GROUP],
+          assignPublicIp: "ENABLED",
         },
-      ],
-    },
-  });
+      },
+      overrides: {
+        containerOverrides: [
+          {
+            name: "vercel-clone-image",
+            environment: [
+              {
+                name: "GIT_REPOSITORY__URL",
+                value: gitUrl,
+              },
+              {
+                name: "PROJECT_ID",
+                value: projectId,
+              },
+            ],
+          },
+        ],
+      },
+    });
 
-  await ecsClient.send(runTask);
+    console.log("Running ECS task with parameters:", JSON.stringify(runTask.input, null, 2));
+    const response = await ecsClient.send(runTask);
+    console.log("ECS Task Response:", response);
 
-  return res.json({
-    status: "queued",
-    data: {
-      projectId,
-      url: `http://${projectId}.localhost:8000`,
-      gitUrl,
-    },
-  });
+    return res.json({
+      status: "queued",
+      data: {
+        projectId,
+        url: `http://${projectId}.localhost:8000`,
+        gitUrl,
+      },
+    });
+  } catch (error) {
+    console.error("Error launching ECS task:", error);
+    return res.status(500).json({ error: "Failed to launch ECS task" });
+  }
 });
