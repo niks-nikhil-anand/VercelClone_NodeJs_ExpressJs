@@ -45,14 +45,14 @@ app.post("/project", async (req, res) => {
     console.log("Received request to /project");
     console.log("Request body:", req.body);
     
-    const { gitUrl } = req.body;
+    const { gitUrl  , slug} = req.body;
     if (!gitUrl) {
       console.error("Missing gitUrl in request body");
       return res.status(400).json({ error: "gitUrl is required" });
     }
 
     console.log("Git URL:", gitUrl);
-    const projectId = generateSlug();
+    const projectId = slug? slug:  generateSlug();
     console.log("Generated Project ID:", projectId);
 
     // Spin container on AWS ECS
