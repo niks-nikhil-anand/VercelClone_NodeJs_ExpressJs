@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ import {
   Link,
   Upload,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import Workflow from "./Workflow";
 
@@ -32,30 +33,83 @@ export default function VercelClone() {
   const [deploymentStep, setDeploymentStep] = useState(0);
   const [deploymentComplete, setDeploymentComplete] = useState(false);
   const [deploymentUrl, setDeploymentUrl] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [gitUrl, setGitUrl] = useState("");
+  const [apiError, setApiError] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState(40);
+  const [showTimer, setShowTimer] = useState(false);
 
-  const handleDeploy = () => {
+  useEffect(() => {
+    let timer;
+    if (showTimer && timeRemaining > 0) {
+      timer = setTimeout(() => {
+        setTimeRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (showTimer && timeRemaining === 0) {
+      setShowTimer(false);
+      setDeploymentComplete(true);
+      setIsDeploying(false);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [timeRemaining, showTimer]);
+
+  const handleDeploy = async () => {
     if (!githubUrl || !githubUrl.includes("github.com")) return;
 
     setIsDeploying(true);
     setDeploymentStep(1);
+    setApiError("");
+    setDeploymentComplete(false);
+    setTimeRemaining(60);
+    setShowTimer(false);
 
-    // Simulate deployment process
-    const steps = [1, 2, 3, 4, 5, 6, 7];
-    let currentStep = 1;
+    try {
+      // Simulate fetching repo step
+      await simulateStep(1);
+      
+      // Actually call the API
+      const response = await fetch("http://localhost:9000/project", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ gitUrl: githubUrl }),
+      });
 
-    const interval = setInterval(() => {
-      currentStep++;
-      setDeploymentStep(currentStep);
-
-      if (currentStep > steps.length) {
-        clearInterval(interval);
-        setDeploymentComplete(true);
-        setIsDeploying(false);
-        // Generate a random deployment URL
-        const randomStr = Math.random().toString(36).substring(2, 8);
-        setDeploymentUrl(`https://${randomStr}.vercel-clone.app`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
-    }, 1500);
+
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+      
+      const { projectId, url, gitUrl: returnedGitUrl } = responseData.data;
+      setProjectId(projectId);
+      setGitUrl(returnedGitUrl || githubUrl);
+      setDeploymentUrl(url);
+
+      // Continue with deployment simulation
+      for (let step = 2; step <= 7; step++) {
+        await simulateStep(step);
+      }
+
+      // Start the final timer step
+      setDeploymentStep(8);
+      setShowTimer(true);
+      
+    } catch (error) {
+      console.error("Deployment error:", error);
+      setApiError(`Failed to deploy: ${error.message}`);
+      setIsDeploying(false);
+    }
+  };
+
+  const simulateStep = (step) => {
+    return new Promise((resolve) => {
+      setDeploymentStep(step);
+      setTimeout(resolve, 1500);
+    });
   };
 
   const deploymentSteps = [
@@ -94,12 +148,17 @@ export default function VercelClone() {
       title: "Configuring Reverse Proxy",
       icon: <Globe className="h-5 w-5" />,
     },
+    {
+      id: 8,
+      title: "Finalizing Deployment",
+      icon: <Clock className="h-5 w-5" />,
+    },
   ];
 
   return (
     <div className="flex flex-col md:flex-row w-full gap-6 p-4">
       {/* Left Side - How it works */}
-     <Workflow />
+      <Workflow />
 
       {/* Right Side - Deploy Form */}
       <div className="w-full md:w-1/2">
@@ -137,6 +196,12 @@ export default function VercelClone() {
               </div>
             </div>
 
+            {apiError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-600 text-sm">{apiError}</p>
+              </div>
+            )}
+
             {(isDeploying || deploymentComplete) && (
               <div className="mt-6 space-y-4">
                 <h3 className="font-medium text-sm">Deployment Progress</h3>
@@ -169,10 +234,21 @@ export default function VercelClone() {
                         }`}
                       >
                         {step.title}
+                        {step.id === 8 && showTimer && timeRemaining > 0 && (
+                          <span className="ml-2 text-blue-600">
+                            ({timeRemaining}s remaining)
+                          </span>
+                        )}
                       </span>
-                      {deploymentStep === step.id && (
+                      {deploymentStep === step.id && step.id !== 8 && (
                         <div className="ml-auto">
                           <div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                      {deploymentStep === step.id && step.id === 8 && showTimer && (
+                        <div className="ml-auto flex items-center">
+                          <div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                          <span className="text-sm font-medium">{timeRemaining}s</span>
                         </div>
                       )}
                     </div>
@@ -187,14 +263,26 @@ export default function VercelClone() {
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <h3 className="font-medium">Deployment Complete!</h3>
                 </div>
-                <div className="mt-2">
-                  <p className="text-sm">Your project is live at:</p>
-                  <a
-                    href="#"
-                    className="text-blue-600 hover:underline mt-1 flex items-center gap-1"
-                  >
-                    {deploymentUrl} <ExternalLink className="h-3 w-3" />
-                  </a>
+                <div className="mt-2 space-y-2">
+                  <div>
+                    <p className="text-sm font-medium">Project ID:</p>
+                    <p className="text-sm">{projectId}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Git Repository:</p>
+                    <p className="text-sm">{gitUrl}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Your project is live at:</p>
+                    <a
+                      href={deploymentUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline mt-1 flex items-center gap-1"
+                    >
+                      {deploymentUrl} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
