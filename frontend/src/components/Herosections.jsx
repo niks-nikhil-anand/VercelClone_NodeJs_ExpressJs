@@ -1,21 +1,22 @@
-"use client"
+"use client";
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Github, 
   Rocket, 
   Server, 
   Globe, 
   CheckCircle, 
-  Play, 
-  Code, 
-  GitFork, 
-  ArrowRight,
   Terminal,
   Package,
-  CheckCheck
+  CheckCheck,
+  FolderOpen,
+  Database,
+  Link,
+  Upload,
+  ExternalLink
 } from 'lucide-react';
 
 export default function VercelClone() {
@@ -32,7 +33,7 @@ export default function VercelClone() {
     setDeploymentStep(1);
     
     // Simulate deployment process
-    const steps = [1, 2, 3, 4, 5];
+    const steps = [1, 2, 3, 4, 5, 6, 7];
     let currentStep = 1;
     
     const interval = setInterval(() => {
@@ -51,11 +52,13 @@ export default function VercelClone() {
   };
 
   const deploymentSteps = [
-    { id: 1, title: 'Fetching GitHub Repository', icon: <GitFork className="h-5 w-5" /> },
-    { id: 2, title: 'Spinning up Docker Container on AWS', icon: <Server className="h-5 w-5" /> },
+    { id: 1, title: 'Fetching GitHub Repository', icon: <Github className="h-5 w-5" /> },
+    { id: 2, title: 'Spinning up Docker Container on AWS ECS', icon: <Server className="h-5 w-5" /> },
     { id: 3, title: 'Installing Dependencies (npm install)', icon: <Package className="h-5 w-5" /> },
     { id: 4, title: 'Building Project (npm run build)', icon: <Terminal className="h-5 w-5" /> },
-    { id: 5, title: 'Configuring Reverse Proxy', icon: <Globe className="h-5 w-5" /> },
+    { id: 5, title: 'Generating dist Folder', icon: <FolderOpen className="h-5 w-5" /> },
+    { id: 6, title: 'Uploading to AWS S3', icon: <Upload className="h-5 w-5" /> },
+    { id: 7, title: 'Configuring Reverse Proxy', icon: <Globe className="h-5 w-5" /> },
   ];
 
   return (
@@ -66,49 +69,87 @@ export default function VercelClone() {
           <CardHeader className="bg-gray-50 border-b">
             <CardTitle className="text-xl font-bold flex items-center gap-2">
               <Rocket className="h-5 w-5" />
-              How Vercel Clone Works
+              Vercel Clone Workflow
             </CardTitle>
-            <CardDescription>The deployment flow explained</CardDescription>
+            <CardDescription>Deployment process explained</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-6">
               <div className="flex items-start gap-3">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Github className="h-5 w-5 text-blue-700" />
+                <div className="bg-blue-100 p-2 rounded-full text-blue-700 flex-shrink-0">
+                  <Link className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">1. GitHub Repository</h3>
-                  <p className="text-sm text-gray-600">We fetch your code directly from GitHub when you submit a URL</p>
+                  <h3 className="font-medium">1. User Submits GitHub URL</h3>
+                  <p className="text-sm text-gray-600">The user provides the URL of a GitHub repository.</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <div className="bg-orange-100 p-2 rounded-full">
-                  <Server className="h-5 w-5 text-orange-700" />
+                <div className="bg-orange-100 p-2 rounded-full text-orange-700 flex-shrink-0">
+                  <Server className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">2. AWS ECS Container</h3>
-                  <p className="text-sm text-gray-600">We provision Docker containers on AWS ECS to build your application</p>
+                  <h3 className="font-medium">2. Spin Up Docker Container on AWS ECS</h3>
+                  <p className="text-sm text-gray-600">A Docker container is launched in AWS ECS.</p>
+                  <p className="text-sm text-gray-600">The container clones the repository into a folder.</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Code className="h-5 w-5 text-green-700" />
+                <div className="bg-green-100 p-2 rounded-full text-green-700 flex-shrink-0">
+                  <Package className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">3. Build Process</h3>
-                  <p className="text-sm text-gray-600">We run npm install and npm run build in parallel containers for speed</p>
+                  <h3 className="font-medium">3. Install & Build Project</h3>
+                  <p className="text-sm text-gray-600">Inside the container:</p>
+                  <ul className="text-sm text-gray-600 list-disc pl-5 mt-1">
+                    <li><code>npm install</code> is executed.</li>
+                    <li><code>npm run build</code> is run to compile the project.</li>
+                  </ul>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Globe className="h-5 w-5 text-purple-700" />
+                <div className="bg-yellow-100 p-2 rounded-full text-yellow-700 flex-shrink-0">
+                  <FolderOpen className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">4. Reverse Proxy</h3>
-                  <p className="text-sm text-gray-600">We create a unique URL and connect it to your app via our reverse proxy</p>
+                  <h3 className="font-medium">4. Generate 'dist' Folder</h3>
+                  <p className="text-sm text-gray-600">The build process creates a 'dist' folder (or equivalent output folder).</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="bg-purple-100 p-2 rounded-full text-purple-700 flex-shrink-0">
+                  <Database className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-medium">5. Upload to AWS S3</h3>
+                  <p className="text-sm text-gray-600">A random folder name is generated.</p>
+                  <p className="text-sm text-gray-600">The 'dist' folder is uploaded to an S3 bucket under that name.</p>
+                  <p className="text-sm text-gray-600">A random public URL is created for access.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="bg-indigo-100 p-2 rounded-full text-indigo-700 flex-shrink-0">
+                  <Globe className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-medium">6. Set Up Reverse Proxy</h3>
+                  <p className="text-sm text-gray-600">A unique, friendly URL is generated.</p>
+                  <p className="text-sm text-gray-600">The reverse proxy is configured to route requests to the app hosted on S3.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="bg-red-100 p-2 rounded-full text-red-700 flex-shrink-0">
+                  <ExternalLink className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-medium">7. Final Deployment</h3>
+                  <p className="text-sm text-gray-600">The app is now live and accessible via the generated URL through the reverse proxy.</p>
                 </div>
               </div>
             </div>
@@ -197,7 +238,7 @@ export default function VercelClone() {
                     href="#" 
                     className="text-blue-600 hover:underline mt-1 flex items-center gap-1"
                   >
-                    {deploymentUrl} <ArrowRight className="h-3 w-3" />
+                    {deploymentUrl} <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               </div>
