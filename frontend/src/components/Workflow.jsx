@@ -14,13 +14,14 @@ import {
   Database,
   Link,
   ExternalLink,
-  Package 
+  Package,
+  Scale 
 } from 'lucide-react';
 
 const Workflow = () => {
   return (
     <div>
-      <div className="w-full  space-y-4">
+      <div className="w-full space-y-4">
         <Card className="shadow-md">
           <CardHeader className="bg-gray-50 border-b">
             <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -29,7 +30,7 @@ const Workflow = () => {
             </CardTitle>
             <CardDescription>Deployment process explained</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="">
             <div className="space-y-6">
               <div className="flex items-start gap-3">
                 <div className="bg-blue-100 p-2 rounded-full text-blue-700 flex-shrink-0">
@@ -136,6 +137,34 @@ const Workflow = () => {
                     The app is now live and accessible via the generated URL
                     through the reverse proxy.
                   </p>
+                </div>
+              </div>
+              
+              <div className="mt-8 border-t pt-6">
+                <div className="flex items-start gap-3">
+                  <div className="bg-teal-100 p-2 rounded-full text-teal-700 flex-shrink-0">
+                    <Scale className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Why It's Scalable</h3>
+                    <ul className="text-sm text-gray-600 list-disc pl-5 mt-2 space-y-2">
+                      <li>
+                        <span className="font-medium">Parallel Processing:</span> Uses Docker containers on AWS ECS, allowing multiple containers to run in parallel for simultaneous builds.
+                      </li>
+                      <li>
+                        <span className="font-medium">Static Serving:</span> After building, apps are served as static files from AWS S3, which can handle massive traffic without performance degradation.
+                      </li>
+                      <li>
+                        <span className="font-medium">Dynamic Routing:</span> The reverse proxy dynamically routes unique URLs without needing dedicated servers for each deployment.
+                      </li>
+                      <li>
+                        <span className="font-medium">Independent Scaling:</span> Each component—build, storage, and routing—scales independently, providing flexibility based on specific demand patterns.
+                      </li>
+                      <li>
+                        <span className="font-medium">Cost Efficiency:</span> Resources are allocated on-demand, allowing the system to scale up during high demand and scale down during quiet periods.
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
