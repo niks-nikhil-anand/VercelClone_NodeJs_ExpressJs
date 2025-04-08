@@ -22,9 +22,9 @@ export default function Footer() {
               <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center mr-2">
                 <div className="h-3 w-3 bg-black rounded-full"></div>
               </div>
-              <span className="font-bold text-white">Vercel</span>
+              <span className="font-bold text-white">Vercel Clone </span>
             </a>
-            <span className="text-sm ml-4">© {currentYear} Vercel Clone</span>
+            <span className="text-sm ml-4">© {currentYear} Made By Nikhil</span>
           </div>
 
           {/* Links */}

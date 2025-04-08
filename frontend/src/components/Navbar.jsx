@@ -1,6 +1,8 @@
-"use client"
+"use client";
 import { useState } from "react";
-import { Menu, X, ChevronDown, ExternalLink, Github } from "lucide-react";
+import { Menu, X, ChevronDown, ExternalLink } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
+import Link from "next/link";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,7 +13,7 @@ export default function Navbar() {
 
   return (
     <div className="bg-black text-white w-full border-b border-gray-800">
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo and brand */}
           <div className="flex items-center">
@@ -28,13 +30,22 @@ export default function Navbar() {
           {/* Desktop navigation */}
           <div className="hidden md:block">
             <div className="flex items-center space-x-8">
-              <a href="/" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="/"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 Home
               </a>
-              <a href="/about" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="/about"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 About
               </a>
-              <a href="/portfolio" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="/portfolio"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 Portfolio
               </a>
               <div className="relative group">
@@ -44,19 +55,31 @@ export default function Navbar() {
                 </button>
                 <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gray-900 ring-1 ring-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-1 px-2">
-                    <a href="/solutions/frontend" className="block px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                    <a
+                      href="/solutions/frontend"
+                      className="block px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                    >
                       Frontend
                     </a>
-                    <a href="/solutions/backend" className="block px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                    <a
+                      href="/solutions/backend"
+                      className="block px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                    >
                       Backend
                     </a>
-                    <a href="/solutions/fullstack" className="block px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                    <a
+                      href="/solutions/fullstack"
+                      className="block px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                    >
                       Fullstack
                     </a>
                   </div>
                 </div>
               </div>
-              <a href="/pricing" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="/pricing"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 Pricing
               </a>
             </div>
@@ -64,15 +87,26 @@ export default function Navbar() {
 
           {/* Right side buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <a href="/login" className="text-gray-300 hover:text-white transition-colors">
+            <a
+              href="/login"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Login
             </a>
-            <a href="/signup" className="bg-white text-black px-4 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors">
+            <a
+              href="/signup"
+              className="bg-white text-black px-4 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors"
+            >
               Sign Up
             </a>
-            <a href="https://github.com" className="text-gray-400 hover:text-white transition-colors">
-              <Github className="h-5 w-5" />
-            </a>
+            <Link
+              href={
+                "https://github.com/niks-nikhil-anand/VercelClone_NodeJs_ExpressJs"
+              }
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <FaGithub className="h-5 w-5" />
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -133,7 +167,9 @@ export default function Navbar() {
             </div>
             <div className="ml-3">
               <div className="text-base font-medium text-white">Guest User</div>
-              <div className="text-sm font-medium text-gray-400">guest@example.com</div>
+              <div className="text-sm font-medium text-gray-400">
+                guest@example.com
+              </div>
             </div>
           </div>
           <div className="mt-3 px-2 space-y-1">
